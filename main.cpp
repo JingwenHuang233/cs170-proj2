@@ -9,6 +9,9 @@ using namespace std;
 double leave_one_out_cross_validation(vector<vector<double>> data, vector<int> current_set, int feature_to_add);
 void forward(vector<vector<double>> data);
 void backward(vector<vector<double>> data);
+vector<double> subtract(vector<double>object_to_classify, vector<double>other);
+vector<double> power_of_2(vector<double>);
+double sum(vector<double>);
 int main(int argc, char** argv){
     ifstream file;  //https://linuxhint.com/read-text-file-2d-array-cpp/
     file.open(argv[1]);
@@ -40,8 +43,20 @@ int main(int argc, char** argv){
 }
 
 double leave_one_out_cross_validation(vector<vector<double>> data, vector<int> current_set, int feature_to_add){
-    double accuracy = (double)rand()/RAND_MAX;
-    return accuracy;
+    for(int i = 0; i<data.size(); ++i){
+        vector<double> object_to_classify(data[i].begin()+1, data[i].end());
+        int label = data[i][0];
+        double nearest_neighbor_distance = numeric_limits<double>::infinity();
+        double nearest_neighbor_location = numeric_limits<double>::infinity();
+        for(int j = 0; j<data.size(); ++j){
+            if(j!=i){
+                cout<< "ask if "<< i+1<< " is nearest neighbor with" << j+1<<endl;
+                double distance = sqrt(0);
+            }
+            
+        }
+    }
+    return 0;
 }
 
 void forward(vector<vector<double>> data){
@@ -114,4 +129,26 @@ void backward(vector<vector<double>> data){
     }
     cout<<"}, which has an accuracy of "<<best_accuracy*100<<"%\n";
 
+}
+
+vector<double> subtract(vector<double>object_to_classify, vector<double>other){
+    vector<double> output;
+    for (int i = 0; i<object_to_classify.size(); i++){
+        output.push_back(object_to_classify[i]-other[i]);
+    }
+    return output;
+}
+vector<double> power_of_2(vector<double> a){
+    vector<double> output;
+    for(int i = 0; i<a.size(); ++i){
+        output.push_back(a[i]*a[i]);
+    }
+    return output;
+}
+double sum(vector<double> a){
+    double sum = 0;
+    for(int i = 0; i<a.size(); ++i){
+        sum+=a[i];
+    }
+    return sum;
 }
