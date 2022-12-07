@@ -7,7 +7,7 @@
 #include <math.h>
 
 using namespace std;
-double leave_one_out_cross_validation(vector<vector<double>> data, vector<int> current_set, int feature_to_add);
+double leave_one_out_cross_validation(vector<vector<double>> data, vector<int> current_set, int feature_to_add_or_remove, int mode);
 void forward(vector<vector<double>> data);
 void backward(vector<vector<double>> data);
 vector<double> subtract(vector<double>object_to_classify, vector<double>other);
@@ -43,29 +43,61 @@ int main(int argc, char** argv){
     return 0;
 }
 
-double leave_one_out_cross_validation(vector<vector<double>> data, vector<int> current_set, int feature_to_add){
-    for(int i = 0; i<data.size(); ++i){
-        vector<double> object_to_classify(data[i].begin()+1, data[i].end());
-        int label = data[i][0];
+double leave_one_out_cross_validation(vector<vector<double>> data, vector<int> current_set, int feature_to_add_or_remove, int mode){
+    vector<vector<double>> d(data.size());
+    if(mode == 1){
+        current_set.push_back(feature_to_add_or_remove);
+        for(int i = 0; i<data.size(); ++i){
+            d[i].push_back(data[i][0]);
+            for(int j = 0; j<current_set.size(); ++j){
+                d[i].push_back(data[i][current_set[j]]);
+            }
+        }
+    }
+    else if(mode == 2){
+        if(feature_to_add_or_remove == 0){
+            d = data;
+        }
+        else{
+            current_set.erase(find(current_set.begin(), current_set.end(), feature_to_add_or_remove));
+            for(int i = 0; i<data.size(); ++i){
+                d[i].push_back(data[i][0]);
+                for(int j = 0; j<current_set.size(); ++j){
+                    d[i].push_back(data[i][current_set[j]]);
+                }
+            }
+        }
+    }
+    
+    int correct = 0;
+    double accuracy = 0;
+    for(int i = 0; i<d.size(); ++i){
+        vector<double> object_to_classify(d[i].begin()+1, d[i].end());
+        int label = d[i][0];
         double nearest_neighbor_distance = numeric_limits<double>::infinity();
         double nearest_neighbor_location = numeric_limits<double>::infinity();
         int nearest_neighbor_label = 0;
-        for(int j = 0; j<data.size(); ++j){
+        for(int j = 0; j<d.size(); ++j){
             if(j!=i){
-                vector<double> other(data[j].begin()+1, data[j].end());
+                vector<double> other(d[j].begin()+1, d[j].end());
                 double distance = sqrt(sum(power_of_2(subtract(object_to_classify, other))));
                 if(distance< nearest_neighbor_distance){
                     nearest_neighbor_distance = distance;
                     nearest_neighbor_location = j;
-                    nearest_neighbor_label = data[nearest_neighbor_location][0];
+                    nearest_neighbor_label = d[nearest_neighbor_location][0];
                 }
             }
             
         }
-        cout<<"Object "<< i+1 << " is in class "<< label << endl;
-        cout<< "Its nearest neighbor is "<< nearest_neighbor_location<< " which is in class "<< nearest_neighbor_label << endl;
+        // cout<<"Object "<< i+1 << " is in class "<< label << endl;
+        // cout<< "Its nearest neighbor is "<< nearest_neighbor_location<< " which is in class "<< nearest_neighbor_label << endl;
+        if(label == nearest_neighbor_label){
+            ++correct;
+        }
     }
-    return 0;
+    accuracy = (double)correct/data.size();
+    cout<<"Accuracy: "<<accuracy<<endl;
+    return accuracy;
 }
 
 void forward(vector<vector<double>> data){
@@ -80,7 +112,7 @@ void forward(vector<vector<double>> data){
         for (int j = 1; j< numFeatures; ++j){
             if (find(current_set_of_features.begin(), current_set_of_features.end(), j) == current_set_of_features.end()){
                 cout<< "--Considering adding feature "<<j<<endl;
-                double accuracy = leave_one_out_cross_validation(data,current_set_of_features,j);
+                double accuracy = leave_one_out_cross_validation(data,current_set_of_features,j,1);
                 if (accuracy > best_so_far_accuracy){
                     best_so_far_accuracy = accuracy;
                     feature_to_add_at_this_level = j;
@@ -107,7 +139,7 @@ void backward(vector<vector<double>> data){
     for (int i = 1; i < numFeatures; i++) {
         current_set_of_features.push_back(i);
     }
-    double best_accuracy = leave_one_out_cross_validation(data,current_set_of_features,0);//no feature to remove, need to fix
+    double best_accuracy = leave_one_out_cross_validation(data,current_set_of_features,0,2);//no feature to remove, need to fix
     vector<int> best_features_set = current_set_of_features;
     for (int i = 1; i< numFeatures; ++i){
         cout<< "On the "<<i<<" th level of of the search tree"<<endl;
@@ -116,7 +148,7 @@ void backward(vector<vector<double>> data){
         for (int j = 1; j< numFeatures; ++j){
             if (find(current_set_of_features.begin(), current_set_of_features.end(), j) != current_set_of_features.end()){ //if found
                 cout<< "--Considering removing feature "<<j<<endl;
-                double accuracy = leave_one_out_cross_validation(data,current_set_of_features,j);
+                double accuracy = leave_one_out_cross_validation(data,current_set_of_features,j,2);
                 if (accuracy > best_so_far_accuracy){
                     best_so_far_accuracy = accuracy;
                     feature_to_remove_at_this_level = j;
