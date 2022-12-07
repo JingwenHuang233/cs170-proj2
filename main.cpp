@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <math.h>
 
 using namespace std;
 double leave_one_out_cross_validation(vector<vector<double>> data, vector<int> current_set, int feature_to_add);
@@ -48,13 +49,21 @@ double leave_one_out_cross_validation(vector<vector<double>> data, vector<int> c
         int label = data[i][0];
         double nearest_neighbor_distance = numeric_limits<double>::infinity();
         double nearest_neighbor_location = numeric_limits<double>::infinity();
+        int nearest_neighbor_label = 0;
         for(int j = 0; j<data.size(); ++j){
             if(j!=i){
-                cout<< "ask if "<< i+1<< " is nearest neighbor with" << j+1<<endl;
-                double distance = sqrt(0);
+                vector<double> other(data[j].begin()+1, data[j].end());
+                double distance = sqrt(sum(power_of_2(subtract(object_to_classify, other))));
+                if(distance< nearest_neighbor_distance){
+                    nearest_neighbor_distance = distance;
+                    nearest_neighbor_location = j;
+                    nearest_neighbor_label = data[nearest_neighbor_location][0];
+                }
             }
             
         }
+        cout<<"Object "<< i+1 << " is in class "<< label << endl;
+        cout<< "Its nearest neighbor is "<< nearest_neighbor_location<< " which is in class "<< nearest_neighbor_label << endl;
     }
     return 0;
 }
