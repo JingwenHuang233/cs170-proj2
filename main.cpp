@@ -14,7 +14,8 @@ vector<double> subtract(vector<double>object_to_classify, vector<double>other);
 vector<double> power_of_2(vector<double>);
 double sum(vector<double>);
 int main(int argc, char** argv){
-    ifstream file;  //https://linuxhint.com/read-text-file-2d-array-cpp/
+    //https://linuxhint.com/read-text-file-2d-array-cpp/ predefined utility routine that reads data files into a 2D array
+    ifstream file;  
     file.open(argv[1]);
     vector<vector<double>> data;
     string line;
@@ -34,10 +35,10 @@ int main(int argc, char** argv){
     cin>>choice;
     switch(choice){
         case 1: 
-            forward(data);
+            forward(data); //forward selection
             break;
         case 2:
-            backward(data);
+            backward(data); //backward elimination 
             break;
     }
     return 0;
@@ -45,7 +46,7 @@ int main(int argc, char** argv){
 
 double leave_one_out_cross_validation(vector<vector<double>> data, vector<int> current_set, int feature_to_add_or_remove, int mode){
     vector<vector<double>> d(data.size());
-    if(mode == 1){
+    if(mode == 1){ //if forward, add new feature to cur_set
         current_set.push_back(feature_to_add_or_remove);
         for(int i = 0; i<data.size(); ++i){
             d[i].push_back(data[i][0]);
@@ -54,7 +55,7 @@ double leave_one_out_cross_validation(vector<vector<double>> data, vector<int> c
             }
         }
     }
-    else if(mode == 2){
+    else if(mode == 2){ //if backward, remove feature from cur_set
         if(feature_to_add_or_remove == 0){
             d = data;
         }
@@ -139,7 +140,7 @@ void backward(vector<vector<double>> data){
     for (int i = 1; i < numFeatures; i++) {
         current_set_of_features.push_back(i);
     }
-    double best_accuracy = leave_one_out_cross_validation(data,current_set_of_features,0,2);//no feature to remove, need to fix
+    double best_accuracy = leave_one_out_cross_validation(data,current_set_of_features,0,2); //calculate accuracy for all features
     vector<int> best_features_set = current_set_of_features;
     for (int i = 1; i< numFeatures; ++i){
         cout<< "On the "<<i<<" th level of of the search tree"<<endl;
